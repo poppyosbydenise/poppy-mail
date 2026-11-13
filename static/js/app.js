@@ -1,4 +1,4 @@
-/* Denise Mail: the retro interface. Talks only to the local Denise Mail server on this computer. */
+/* Poppy Mail: the retro interface. Talks only to the local Poppy Mail server on this computer. */
 (function () {
   'use strict';
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -71,7 +71,7 @@
           throw err;
         }
         return x.j;
-      }, function () { throw new Error('Could not reach Denise Mail. Is the program still running?'); });
+      }, function () { throw new Error('Could not reach Poppy Mail. Is the program still running?'); });
   }
   function toast(msg, kind) {
     var el = document.createElement('div'); el.className = 'toast' + (kind ? ' ' + kind : ''); el.textContent = msg; $('#toasts').appendChild(el);
@@ -99,7 +99,7 @@
     S.signedOn = false; stopTimers(); WM.closeAll(); DMSound.jingle(false);
     $('#app').hidden = true; $('#signon').hidden = false; $('.signon-win').hidden = false; $('#dial').hidden = true;
     $('#so-pass').value = ''; var er = $('#so-error'); if (errMsg) { er.textContent = errMsg; er.hidden = false; } else er.hidden = true;
-    document.title = 'Denise Mail';
+    document.title = 'Poppy Mail';
   }
   function doSignOn(payload) {
     $('#so-error').hidden = true; DMSound.setEnabled($('#so-sound').checked); S.sound = DMSound.isEnabled(); store.set('sound', S.sound); DMSound.unlock();
@@ -203,7 +203,7 @@
     $$('[data-view]').forEach(function (el) { var name = el.getAttribute('data-view'), f = VIEWS[name]; if (f && (!only || only.indexOf(name) !== -1)) f(el); });
     updateToolbar(); updateTitle(); setStatus();
   }
-  function updateTitle() { document.title = (S.unreadInbox > 0 ? '(' + S.unreadInbox + ') ' : '') + 'Denise Mail'; }
+  function updateTitle() { document.title = (S.unreadInbox > 0 ? '(' + S.unreadInbox + ') ' : '') + 'Poppy Mail'; }
   function moodParts() { var m = String(S.profile.mood || DEFAULT_PROFILE.mood).split('|'); return { emoji: m[0], text: m[1] || '' }; }
   function renderProfile(el) {
     var md = moodParts(), playing = DMSound.isJingle();

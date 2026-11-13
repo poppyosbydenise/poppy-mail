@@ -1,4 +1,4 @@
-# Denise Mail 📬
+# Poppy Mail 📬
 
 A retro email program for your **Gmail**, with three looks:
 
@@ -10,7 +10,7 @@ It also has a dial-up sign-on with modem sounds, a "you've got new mail" chime, 
 
 ## Start it
 
-**Easiest:** double-click **`Start Denise Mail.command`**. A Terminal window opens and your browser goes to the program.
+**Easiest:** double-click **`Start Poppy Mail.command`**. A Terminal window opens and your browser goes to the program.
 
 **Or in Terminal:**
 
@@ -28,7 +28,7 @@ There is nothing to install: it only uses Python 3 (already on most Macs) and yo
 Gmail needs a special **App Password** for programs like this (your normal password won't work, and you should never type it into a program like this).
 
 1. Turn on **2-Step Verification** for your Google account (Google Account, then Security).
-2. Go to **myaccount.google.com/apppasswords** and create an App Password named "Denise Mail".
+2. Go to **myaccount.google.com/apppasswords** and create an App Password named "Poppy Mail".
 3. Copy the 16-letter code and paste it into the **App Password** box on the sign-on screen (spaces don't matter).
 
 Work and school accounts often don't allow App Passwords. If yours doesn't, ask your admin, or use the demo.

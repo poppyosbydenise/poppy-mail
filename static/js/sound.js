@@ -1,4 +1,4 @@
-/* Denise Mail sounds: everything is synthesized in your browser with the Web Audio API.
+/* Poppy Mail sounds: everything is synthesized in your browser with the Web Audio API.
    No audio files, no network. Sounds only play after you click something. */
 window.DMSound = (function () {
   'use strict';

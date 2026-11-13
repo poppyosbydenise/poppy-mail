@@ -1,5 +1,5 @@
 """
-Tests for Denise Mail. Run:  python3 -m unittest discover -s tests -v
+Tests for Poppy Mail. Run:  python3 -m unittest discover -s tests -v
 
 The Gmail tests use a FAKE IMAP/SMTP server that returns responses in the same shape
 Python's imaplib gives for real Gmail. No real account or network is used.

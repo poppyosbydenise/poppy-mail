@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Denise Mail: a retro, local-only email program for Gmail.
+Poppy Mail: a retro, local-only email program for Gmail.
 
 * Runs a tiny web server on YOUR computer only (127.0.0.1) and opens it in your browser.
 * Talks to Gmail directly over IMAP (reading) and SMTP (sending) using a Google App Password.
@@ -409,12 +409,12 @@ def _demo_messages():
         return {"minutes": minutes_ago, "from": frm, "subject": subject, "body": body, "unread": unread,
                 "starred": starred, "html": html_body, "attach": attach or [], "to": to}
     return [
-        m(3, "Denise Mail Team <hello@poppy-mail.example>", "Welcome to Denise Mail!",
+        m(3, "Poppy Mail Team <hello@poppy-mail.example>", "Welcome to Poppy Mail!",
           "Hi there!\n\nYou're using the DEMO mailbox, so none of this is real mail. Try clicking around:\n\n"
           "  * Read messages and reply to them\n  * Write a new message with the Write button\n  * Star things, delete things (they go to the Trash)\n"
           "  * Switch looks with the Look menu: MSN-style or AOL-style\n\nWhen you're ready, sign off and sign on with your real Gmail address and an App Password.\n\n"
-          "Happy surfing!\nThe Denise Mail Team", html_body=(
-              "<div style='font-family:Verdana,sans-serif'><h2 style='color:#1c5fb8'>Welcome to Denise Mail! \U0001F4EC</h2>"
+          "Happy surfing!\nThe Poppy Mail Team", html_body=(
+              "<div style='font-family:Verdana,sans-serif'><h2 style='color:#1c5fb8'>Welcome to Poppy Mail! \U0001F4EC</h2>"
               "<p>You're using the <b>DEMO</b> mailbox, so none of this is real mail.</p><ul><li>Read, reply, forward</li><li>Star and delete</li><li>Switch looks: MSN-style or AOL-style</li></ul>"
               "<p style='background:#fff3b0;padding:8px;border:1px solid #c9a800'>Pictures from the internet are blocked until you click <b>Show pictures</b>.</p></div>")),
         m(95, "Jamie <jamie.dialup@example.com>", "ttyl?? (are you online tonight)", "hey hey!!\n\nare you gonna be on tonight? my mom said I can use the phone line after 8 as long as nobody calls.\n\nbrb dinner\n\n- Jamie", ),
@@ -583,7 +583,7 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 def make_handler(app):
     class Handler(BaseHTTPRequestHandler):
-        server_version = "DeniseMail"
+        server_version = "PoppyMail"
         protocol_version = "HTTP/1.1"
 
         def log_message(self, fmt, *args):  # never log request lines (they may contain tokens)
@@ -804,14 +804,14 @@ def create_server(port=0, auto_demo=False):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Denise Mail: a retro Gmail program that runs only on your computer.")
+    ap = argparse.ArgumentParser(description="Poppy Mail: a retro Gmail program that runs only on your computer.")
     ap.add_argument("--port", type=int, default=0, help="port to use (default: first free one from 8765)")
     ap.add_argument("--no-browser", action="store_true", help="don't open the browser automatically")
     ap.add_argument("--demo", action="store_true", help="start signed in to the demo mailbox")
     args = ap.parse_args()
     httpd, app = create_server(args.port, args.demo)
     url = "http://127.0.0.1:%d/" % app.port
-    print("\n  Denise Mail is running at %s" % url)
+    print("\n  Poppy Mail is running at %s" % url)
     print("  It only works on this computer. Press Ctrl+C here to quit.\n")
     if not args.no_browser:
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
