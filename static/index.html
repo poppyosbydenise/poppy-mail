@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" data-theme="msn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="dm-token" content="__TOKEN__">
+<meta name="dm-autodemo" content="__AUTODEMO__">
+<meta name="referrer" content="no-referrer">
+<title>Denise Mail</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%AC%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/retro.css">
+</head>
+<body>
+
+<!-- ============ SIGN ON ============ -->
+<div id="signon">
+  <section class="frame signon-win" aria-labelledby="so-title">
+    <div class="titlebar"><span aria-hidden="true">&#128236;</span><span id="so-title">Sign On to Denise Mail</span></div>
+    <div class="signon-body">
+      <div class="so-brand" aria-hidden="true">
+        <div class="so-mailbox"><span class="so-flag"></span><span class="so-box">&#128236;</span></div>
+        <div class="so-logo">Denise<br>Mail</div>
+        <div class="so-tag">Your mail, the retro way</div>
+      </div>
+      <div class="so-main">
+        <form id="so-form" autocomplete="off" novalidate>
+          <fieldset class="look-pick"><legend>Pick your look</legend>
+            <label class="look"><input type="radio" name="look" value="msn" checked><span class="look-card look-msn"><span class="lk-bar"></span><span class="lk-side"></span><span class="lk-list"></span><strong>MSN-style</strong><em>Messenger Blue</em></span></label>
+            <label class="look"><input type="radio" name="look" value="ms"><span class="look-card look-ms"><span class="lk-bar"></span><span class="lk-heart">&#128150;</span><span class="lk-prof"></span><span class="lk-list"></span><strong>MySpace-style</strong><em>Glitter Profile</em></span></label>
+            <label class="look"><input type="radio" name="look" value="aol"><span class="look-card look-aol"><span class="lk-bar"></span><span class="lk-win"></span><span class="lk-win lk-win2"></span><strong>AOL-style</strong><em>Dial-Up Online</em></span></label>
+          </fieldset>
+          <div class="field"><label for="so-email">Gmail address</label><input id="so-email" type="email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="you@gmail.com"></div>
+          <div class="field"><label for="so-pass">App Password <span class="hint">(16 letters, not your normal password)</span></label><input id="so-pass" type="password" autocomplete="off" spellcheck="false" placeholder="abcd efgh ijkl mnop"></div>
+          <label class="check"><input type="checkbox" id="so-show"> Show password</label>
+          <label class="check"><input type="checkbox" id="so-sound" checked> Play dial-up sounds</label>
+          <p id="so-error" class="so-error" role="alert" hidden></p>
+          <div class="so-buttons"><button type="submit" class="btn primary" id="so-go">&#128222; Sign On</button><button type="button" class="btn" id="so-demo">&#127918; Try the Demo Mailbox</button></div>
+        </form>
+        <details class="so-help"><summary>How do I get an App Password?</summary>
+          <ol>
+            <li>Turn on <strong>2-Step Verification</strong> for your Google account (Google Account &rarr; Security).</li>
+            <li>Go to <strong>myaccount.google.com/apppasswords</strong> and create one named "Denise Mail".</li>
+            <li>Copy the 16-letter code Google shows you and paste it above.</li>
+          </ol>
+          <p>Work or school accounts may not allow App Passwords. If so, try the demo, or ask your admin.</p>
+        </details>
+        <p class="so-privacy">&#128274; This program runs <strong>only on this computer</strong>. Your password is kept in memory while you're signed on and is <strong>never saved</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="frame dial-win" id="dial" hidden aria-live="polite" aria-labelledby="dial-title">
+    <div class="titlebar"><span aria-hidden="true">&#128222;</span><span id="dial-title">Connecting...</span></div>
+    <div class="dial-body">
+      <div class="dial-art" aria-hidden="true">&#128187; &#8594; &#9742;&#65039; &#8594; &#127760;</div>
+      <ul id="dial-lines" class="dial-lines"></ul>
+      <div class="dial-bar" aria-hidden="true"><span id="dial-fill"></span></div>
+      <div class="so-buttons"><button type="button" class="btn" id="dial-skip">Skip the noise</button><button type="button" class="btn" id="dial-cancel">Cancel</button></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ THE PROGRAM ============ -->
+<div id="app" hidden>
+  <header id="toolbar" aria-label="Toolbar"></header>
+  <main id="desk"></main>
+  <footer id="status" role="status" aria-live="polite"></footer>
+</div>
+
+<div id="toasts" role="status" aria-live="polite"></div>
+<dialog id="profile-dlg" class="frame"><div class="titlebar"><span aria-hidden="true">&#128150;</span><span>Edit my profile</span></div>
+  <form id="profile-form" class="dlg-body">
+    <div class="field"><label for="pf-name">My name</label><input id="pf-name" type="text" maxlength="30" autocomplete="off"></div>
+    <div class="field"><label for="pf-mood">My mood</label><select id="pf-mood"><option value="&#128522;|feeling happy">&#128522; feeling happy</option><option value="&#128525;|in love">&#128525; in love</option><option value="&#129321;|so excited">&#129321; so excited</option><option value="&#128564;|sleepy">&#128564; sleepy</option><option value="&#128526;|chillin">&#128526; chillin</option><option value="&#129395;|party time">&#129395; party time</option><option value="&#129300;|thinking">&#129300; thinking</option><option value="&#128546;|a little sad">&#128546; a little sad</option><option value="&#127911;|jamming">&#127911; jamming</option><option value="&#128218;|studying">&#128218; studying</option></select></div>
+    <div class="field"><label for="pf-song">Now playing</label><input id="pf-song" type="text" maxlength="60" autocomplete="off"></div>
+    <div class="field"><label for="pf-about">About me</label><textarea id="pf-about" rows="3" maxlength="140"></textarea></div>
+    <fieldset class="pf-group"><legend>My avatar</legend><div id="pf-avatars" class="pf-choices"></div></fieldset>
+    <fieldset class="pf-group"><legend>My color scheme</legend><div id="pf-skins" class="pf-choices"></div></fieldset>
+    <p class="muted">Saved only on this computer. Nothing is sent anywhere.</p>
+    <div class="so-buttons"><button type="submit" class="btn primary">Save my profile</button><button type="button" class="btn" id="pf-cancel">Cancel</button></div>
+  </form></dialog>
+<dialog id="confirm" class="frame"><div class="titlebar"><span id="cf-title">Please confirm</span></div><div class="dlg-body"><p id="cf-text"></p><div class="so-buttons"><button type="button" class="btn primary" id="cf-yes">Yes</button><button type="button" class="btn" id="cf-no">No</button></div></div></dialog>
+
+<script src="js/sound.js"></script>
+<script src="js/wm.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
