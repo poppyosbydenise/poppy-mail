@@ -57,3 +57,12 @@ Read mail (plain text, or formatted with pictures blocked), reply, reply all, fo
 - `denise_mail.py`: the whole back end (Gmail IMAP and SMTP, demo mailbox, local web server).
 - `static/`: the interface (`index.html`, `css/retro.css` with both looks, `js/app.js`, `js/wm.js` for draggable windows, `js/sound.js` for sounds).
 - Run the tests: `python3 -m unittest discover -s tests -v`
+
+## Check it works with your Gmail
+Before you trust it with real mail, run the built-in check. It is read-only: it signs in, lists your folders, loads your newest page of mail, opens (without marking read) your newest message and tries two searches. It prints only PASS/FAIL, never your mail or your password.
+
+```
+python3 denise_mail.py --selftest you@gmail.com
+```
+
+Add `--send-test` to also send one test email to yourself. If any step says FAIL, copy those lines when asking for help.

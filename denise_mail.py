@@ -15,6 +15,7 @@ import email
 import email.policy
 import email.utils
 import html
+import base64
 import imaplib
 import json
 import mimetypes
@@ -80,6 +81,21 @@ def imap_quote(name):
     return '"' + name.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def imap_utf7_decode(name):
+    """Decode IMAP modified UTF-7 (how Gmail encodes labels like 'Caf&AOk-')."""
+    def repl(m):
+        chunk = m.group(1)
+        if chunk == "":
+            return "&"
+        try:
+            b64 = chunk.replace(",", "/")
+            b64 += "=" * (-len(b64) % 4)
+            return base64.b64decode(b64).decode("utf-16-be")
+        except Exception:
+            return m.group(0)
+    return re.sub(r"&([^-]*)-", repl, name)
+
+
 def clean_header_text(s):
     return re.sub(r"[\r\n]+", " ", str(s or "")).strip()
 
@@ -137,7 +153,7 @@ def build_outgoing(sender, data):
             msg[field] = value
     msg["Subject"] = clean_header_text(data.get("subject", "")) or "(no subject)"
     msg["Date"] = email.utils.formatdate(localtime=True)
-    msg["Message-ID"] = email.utils.make_msgid(domain="denise-mail.local")
+    msg["Message-ID"] = email.utils.make_msgid(domain=sender.split("@")[-1] or "gmail.com")
     if data.get("inReplyTo"):
         msg["In-Reply-To"] = clean_header_text(data["inReplyTo"])
     if data.get("references"):
@@ -223,7 +239,7 @@ class GmailBackend:
                 if "\\noselect" in flags:
                     continue
                 kind = "inbox" if name.upper() == "INBOX" else next((SPECIAL_USE[f] for f in flags if f in SPECIAL_USE), "label")
-                found.append({"id": name, "kind": kind, "label": KIND_LABEL.get(kind, name)})
+                found.append({"id": name, "kind": kind, "label": KIND_LABEL.get(kind, imap_utf7_decode(name))})
             order = {k: i for i, k in enumerate(KIND_ORDER)}
             found.sort(key=lambda f: (order.get(f["kind"], 99), f["label"].lower()))
             self._kind_to_name = {}
@@ -268,7 +284,11 @@ class GmailBackend:
             self._select(conn, folder, True)
             if query:
                 q = re.sub(r"[\r\n]+", " ", query).replace("\\", "\\\\").replace('"', '\\"')
-                typ, data = conn.uid("SEARCH", None, "X-GM-RAW", '"%s"' % q)
+                if q.isascii():
+                    typ, data = conn.uid("SEARCH", None, "X-GM-RAW", '"%s"' % q)
+                else:  # non-English text must go to Gmail as a UTF-8 literal
+                    conn.literal = q.encode("utf-8")
+                    typ, data = conn.uid("SEARCH", "CHARSET", "UTF-8", "X-GM-RAW")
             else:
                 typ, data = conn.uid("SEARCH", None, "ALL")
             if typ != "OK":
@@ -803,12 +823,62 @@ def create_server(port=0, auto_demo=False):
     return httpd, app
 
 
+def selftest(address, send_test=False, backend_factory=None):
+    """Check Poppy Mail against a real Gmail account. Read-only unless send_test is set.
+    Prints PASS/FAIL per step and never prints message contents or the password."""
+    import getpass
+    steps = []
+
+    def step(name, fn):
+        try:
+            detail = fn()
+            print("  PASS  %s%s" % (name, (" - " + str(detail)) if detail else ""))
+            steps.append(True)
+            return True
+        except Exception as e:  # report, keep going
+            print("  FAIL  %s - %s: %s" % (name, type(e).__name__, str(e)[:200]))
+            steps.append(False)
+            return False
+
+    password = re.sub(r"\s+", "", getpass.getpass("App Password for %s (hidden, not saved): " % address))
+    print("\nPoppy Mail self-test (read-only)\n")
+    holder = {}
+    factory = backend_factory or GmailBackend
+    if not step("Sign in over IMAP", lambda: holder.setdefault("b", factory(address, password))):
+        print("\nSign-in failed. Check: 2-Step Verification is on, you used a 16-letter App Password, IMAP is enabled in Gmail settings.")
+        return 1
+    b = holder["b"]
+    try:
+        step("List folders and labels", lambda: "%d folders, special: %s" % (len(b.folders()), ",".join(sorted(k for k in b._kind_to_name if k != "label"))))
+        step("Count unread in Inbox", lambda: "%d unread" % b.unread_count())
+        res = {}
+        step("Load newest Inbox page", lambda: res.setdefault("l", b.list_messages("INBOX", 0)) and "%d shown of %d" % (len(res["l"][0]), res["l"][1]))
+        if res.get("l") and res["l"][0]:
+            uid = res["l"][0][0]["uid"]
+            # note: opening a message marks it read, so use readonly fetch
+            step("Fetch and parse newest message", lambda: "parsed, %d attachment(s)" % len(parse_full_message(b._run(lambda c: b._fetch_raw(c, "INBOX", uid, True))[0])["attachments"]))
+        step("Gmail search (in:inbox)", lambda: "%d results" % b.list_messages("INBOX", 0, "in:inbox")[1])
+        step("Gmail search with accents (cafe\u0301)", lambda: "%d results" % b.list_messages("[Gmail]/All Mail" if "all" in b._kind_to_name else "INBOX", 0, "caf\u00e9")[1])
+        if send_test:
+            msg = {"to": address, "subject": "Poppy Mail self-test", "body": "If you can read this, sending works."}
+            step("Send a test message to yourself", lambda: b.send(msg))
+    finally:
+        b.close()
+    ok = all(steps)
+    print("\n%s (%d/%d steps passed)" % ("All good!" if ok else "Some steps failed - paste the FAIL lines above when asking for help", sum(steps), len(steps)))
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser(description="Poppy Mail: a retro Gmail program that runs only on your computer.")
     ap.add_argument("--port", type=int, default=0, help="port to use (default: first free one from 8765)")
     ap.add_argument("--no-browser", action="store_true", help="don't open the browser automatically")
     ap.add_argument("--demo", action="store_true", help="start signed in to the demo mailbox")
+    ap.add_argument("--selftest", metavar="EMAIL", help="check this Gmail account works (read-only, prompts for App Password)")
+    ap.add_argument("--send-test", action="store_true", help="with --selftest, also send one test email to yourself")
     args = ap.parse_args()
+    if args.selftest:
+        raise SystemExit(selftest(args.selftest, args.send_test))
     httpd, app = create_server(args.port, args.demo)
     url = "http://127.0.0.1:%d/" % app.port
     print("\n  Poppy Mail is running at %s" % url)

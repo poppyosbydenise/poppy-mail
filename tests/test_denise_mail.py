@@ -44,6 +44,7 @@ class FakeIMAP:
             "[Gmail]/Trash": {9: (make_raw("Old"), ["\\Seen"])},
         }
         self.selected = None
+        self.literal = None
 
     def login(self, user, pw):
         self.calls.append(("login", user))
@@ -85,7 +86,11 @@ class FakeIMAP:
         self.calls.append(("uid", cmd) + tuple(args))
         if cmd == "SEARCH":
             uids = sorted(box)
-            if "X-GM-RAW" in args:
+            if "CHARSET" in args:  # non-ASCII search: Gmail gets the text as a UTF-8 literal
+                needle = self.literal.decode("utf-8").lower()
+                self.literal = None
+                uids = [u for u in uids if needle in box[u][0].decode("utf-8", "replace").lower()]
+            elif "X-GM-RAW" in args:
                 needle = args[args.index("X-GM-RAW") + 1].strip('"').lower().replace('\\"', '"')
                 uids = [u for u in uids if needle in box[u][0].decode("utf-8", "replace").lower()]
             return "OK", [" ".join(str(u) for u in uids).encode()]
@@ -408,3 +413,35 @@ class ServerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GmailQuirkTests(unittest.TestCase):
+    def test_utf7_labels(self):
+        self.assertEqual(dm.imap_utf7_decode("Caf&AOk-"), "Caf\u00e9")
+        self.assertEqual(dm.imap_utf7_decode("A &- B"), "A & B")
+        self.assertEqual(dm.imap_utf7_decode("[Gmail]/Sent Mail"), "[Gmail]/Sent Mail")
+
+    def test_non_ascii_search_uses_literal(self):
+        b, fake = new_backend()
+        fake.boxes["INBOX"][4] = (b"Subject: caf\xc3\xa9 time\r\nFrom: a@example.com\r\nDate: Mon, 03 Nov 2025 10:00:00 +0000\r\n\r\nbody", [])
+        items, total = b.list_messages("INBOX", 0, "caf\u00e9")
+        self.assertEqual(total, 1)
+        self.assertEqual(items[0]["uid"], 4)
+
+    def test_message_id_uses_sender_domain(self):
+        msg = dm.build_outgoing("me@gmail.com", {"to": "a@example.com", "body": "x"})
+        self.assertTrue(msg["Message-ID"].endswith("@gmail.com>"))
+
+    def test_selftest_passes_and_hides_password(self):
+        import io, contextlib, getpass
+        from unittest import mock
+        fake = FakeIMAP()
+        factory = lambda a, p: dm.GmailBackend(a, p, imap_factory=lambda: fake, smtp_factory=FakeSMTP)
+        out = io.StringIO()
+        with mock.patch.object(getpass, "getpass", return_value="abcd efgh ijkl mnop"), contextlib.redirect_stdout(out):
+            code = dm.selftest("me@gmail.com", True, backend_factory=factory)
+        text = out.getvalue()
+        self.assertEqual(code, 0, text)
+        self.assertNotIn("abcd", text)
+        self.assertIn("Send a test message", text)
+        self.assertNotIn("FAIL", text)
